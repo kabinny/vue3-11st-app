@@ -1,19 +1,12 @@
 <template>
-  <h1>Hello {{ msg }}</h1>
+  <Header />
 </template>
 
 <script>
+import Header from '~/components/Header'
 export default {
-  data() {
-    return {
-      msg: 'Vue!'
-    }
+  components: {
+    Header
   }
 }
 </script>
-
-<style lang="scss" scoped>
-h1 {
-  color: salmon;
-}
-</style>

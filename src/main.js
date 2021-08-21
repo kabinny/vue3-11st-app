@@ -1,4 +1,7 @@
 import { createApp } from 'vue'
 import App from './App'
+import fetch from '~/plugins/fetch'
 
-createApp(App).mount('#app')
+createApp(App)
+  .use(fetch)
+  .mount('#app')
