@@ -1,9 +1,9 @@
 <template>
-  <header>
+  <header :class="{ fixed: isFixed }">
     <div class="inner">
       <div
         class="open-nav-drawer"
-        @click="onNav">
+        @click="onNav('LNB')">
       </div>
       <a
         href="javascript:void(0)"
@@ -77,14 +77,64 @@
           </ul>
         </div>
       </div>
+      <ul class="user-menu">
+        <li class="my">
+          <a href="javascript:void(0)"></a>
+          <ul class="my__menu">
+            <li
+              v-for="item in myMenu"
+              :key="item.name">
+              <a :href="item.href">
+                {{ item.name }}
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li><a href="javascript:void(0)"></a></li>
+        <li><a href="javascript:void(0)"></a></li>
+        <li>
+          <a
+            href="javascript:void(0)"
+            @click="onNav('RNB')"></a>
+        </li>
+      </ul>
     </div>
   </header>
+  <div
+    :class="{ fixed: isFixed }"
+    class="utils">
+    <div class="inner">
+      <ul>
+        <li>
+          <a href="javascript:void(0)">베스트</a>
+        </li>
+        <li>
+          <a href="javascript:void(0)">쿠폰/혜택</a>
+        </li>
+        <li>
+          <a href="javascript:void(0)">기획전</a>
+        </li>
+        <li>
+          <a href="javascript:void(0)">오늘장보기</a>
+        </li>
+        <li>
+          <a href="javascript:void(0)">T공식대리점</a>
+        </li>
+        <li>
+          <a
+            class="shocking-deal"
+            href="javascript:void(0)"></a>
+        </li>
+      </ul>
+    </div>
+  </div>
 </template>
 
 <script>
 import dayjs from 'dayjs'
 import Swiper from 'swiper/bundle'
 import 'swiper/swiper-bundle.css'
+import _throttle from 'lodash/throttle'
 
 export default {
   data() {
@@ -92,7 +142,15 @@ export default {
       searchText: '',
       rankings: {},
       tabIndex: 0,
-      isShowRankingWrap: false
+      isShowRankingWrap: false,
+      isFixed: false,
+      myMenu: [
+        { name: '나의 쿠폰', href: 'javascript:void(0)' },
+        { name: '주문/배송조회', href: 'javascript:void(0)' },
+        { name: '취소/반품/교환', href: 'javascript:void(0)' },
+        { name: '고객센터', href: 'javascript:void(0)' },
+        { name: '회원정보', href: 'javascript:void(0)' }
+      ]
     }
   }, 
   computed: {
@@ -112,6 +170,10 @@ export default {
   },
   methods: {
     async init() {
+      window.addEventListener('scroll', _throttle(() => {
+        this.isFixed = window.scrollY > 120
+      }, 100))
+
       const { data } = await this.$fetch({
         method: 'GET',
         url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${apiKey}&requestName=rankings`
@@ -130,8 +192,9 @@ export default {
         })
       })
     },
-    onNav() {
-
+    onNav(name) {
+      this.$store.dispatch('navigation/onNav', name)
+      console.log(this.$store.state.navigation[`isShow${name}`])
     },
     async search() {
       const res = await this.$fetch({
