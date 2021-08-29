@@ -1,8 +1,33 @@
 <template>
-  <div class="global-banner">
+  <div
+    v-if="done"
+    class="global-banner">
     <div class="ad"></div>
-    <div class="wing"></div>
-    <div class="wing"></div>
+    <a
+      :href="banner.vertical.href"
+      class="wing wing--vertical">
+      <div class="text">{{ banner.vertical.name }}</div>
+      <div
+        :style="{ backgroundImage: `url(${banner.vertical.thumbnail})` }"
+        class="thumbnail"></div>
+    </a>
+    <div class="wing-outer">
+      <a class="wing wing--horizontal">
+        <div class="wing__inner">
+          <div class="text">
+            <div class="name">
+              {{ banner.horizontal.name }}
+            </div>
+            <div class="price">
+              <strong>{{ banner.horizontal.price.value }}</strong>{{ banner.horizontal.price.unit }}
+            </div>
+          </div>
+          <div
+            :style="{ backgroundImage: `url(${banner.horizontal.thumbnail})` }"
+            class="thumbnail"></div>
+        </div>
+      </a>
+    </div>
     <div
       class="to-top"
       @click="toTop"></div>
@@ -15,7 +40,8 @@ import scrollTo from 'scroll-to'
 export default {
   data() {
     return {
-      banner: {}
+      banner: {},
+      done: false
     }
   },
   created() {
@@ -25,9 +51,10 @@ export default {
     async init() {
       const { data } = await this.$fetch({
         method: 'GET',
-        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${apiKey}&requestName=banner`
+        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${process.env.API_KEY}&requestName=banner`
       })
       this.banner = data
+      this.done = true
       console.log(this.banner)
     },
     toTop() {
@@ -54,8 +81,85 @@ export default {
       background-repeat: no-repeat;
       background-size: 63px;
     }
-    .wing {
-
+    .wing-outer {
+      width: 70px;
+      height: 70px;
+      margin-bottom: 12px;
+      position: relative;
+    }
+    a.wing {
+      display: block;
+      border: 5px solid #fff;
+      border-radius: 35px;
+      box-sizing: border-box;
+      background-color: #fff;
+      cursor: pointer;
+      box-shadow: 0 0 8px 0 rgba(#000, .1);
+      &--vertical {
+        width: 70px;
+        margin-bottom: 10px;
+        padding-top: 16px;
+        .text {
+          font-size: 12px;
+          text-align: center;
+          margin-bottom: 10px;
+          line-height: 1.2;
+          color: #666;
+          word-break: keep-all;
+        }
+        .thumbnail {
+          width: 60px;
+          height: 60px;
+          border-radius: 50%;
+          background-color: #333;
+          background-size: cover;
+          background-repeat: no-repeat;
+          background-position: center;
+        }
+      }
+      &--horizontal {
+        width: 70px;
+        height: 70px;
+        padding-left: 16px;
+        background-color: #fff;
+        position: absolute;
+        right: 0;
+        overflow: hidden;
+        transition: .1s;
+        &:hover {
+          width: 160px;
+        }
+        .wing__inner {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          .text {
+            font-size: 12px;
+            text-align: center;
+            margin-right: 4px;
+            line-height: 1.2;
+            color: #666;
+            word-break: keep-all;
+            .price {
+              margin-top: 4px;
+              font-size: 11px;
+              strong {
+                font-weight: 700;
+              }
+            }
+          }
+          .thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #333;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center;
+            flex-shrink: 0;
+          }
+        }
+      }
     }
     .to-top {
       width: 50px;

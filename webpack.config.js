@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlPlugin = require('html-webpack-plugin')
 const { VueLoaderPlugin } = require('vue-loader')
+const DotEnv = require('dotenv-webpack')
 
 module.exports = {
   resolve: {
@@ -45,7 +46,8 @@ module.exports = {
     new HtmlPlugin({
       template: './index.html'
     }),
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
+    new DotEnv()
   ],
   devServer: {
     // host: 'localhost',

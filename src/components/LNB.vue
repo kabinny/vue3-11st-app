@@ -177,7 +177,7 @@ export default {
     async init() {
       const { data } = await this.$fetch({
         methods: 'GET',
-        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${apiKey}&requestName=navigations`
+        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${process.env.API_KEY}&requestName=navigations`
       })
       this.nav = data
       this.done = true

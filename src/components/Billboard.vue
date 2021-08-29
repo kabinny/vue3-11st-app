@@ -65,7 +65,7 @@ export default {
     async init() {
       const { data } = await this.$fetch({
         method: 'GET',
-        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${apiKey}&requestName=billboards`
+        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${process.env.API_KEY}&requestName=billboards`
       })
       this.billboards = data
 

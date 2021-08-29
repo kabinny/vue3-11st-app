@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <style>
+    .container {
+      width: 400px;
+      height: 400px;
+      overflow: auto;
+      border: 4px solid;
+    }
+    .box {
+      height: 1000px;
+      border: 4px solid;
+      margin-bottom: 20px;
+      font-size: 100px;
+      background-color: orange;
+      transition: 1s;
+    }
+    .box.active {
+      background-color: royalblue;
+    }
+  </style>
+
+  <div class="container">
+    <div class="box">1</div>
+    <div class="box">2</div>
+    <div class="box">3</div>
+    <div class="box">4</div>
+    <div class="box">5</div>
+    <div class="box">6</div>
+  </div>
+
+  <script>
+    const root = document.querySelector('.container')
+    const boxEls = document.querySelectorAll('.box')
+    const io = new IntersectionObserver(entries => {
+      // console.log(entries)
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // console.log(entry)
+          entry.target.classList.add('active')
+        } else {
+          entry.target.classList.remove('active')
+        }
+      })
+    }, {
+      // root: undefined, // 빈 값 -> 뷰포트 기준
+      // rootMargin: '0px', // 루트 요소 + 마진 영역을 감시 영역으로. 음수값 가능. 0이라도 단위 필수로 붙여야함
+      // threshold: 0 // 0~1 값. 요소가 루트 안에 몇펴센트 만큼 보였을 때 감지가 되는지
+      root,
+      rootMargin: '-200px 0px'
+    })
+    // io.observe(box3)
+    boxEls.forEach(boxEl => {
+      io.observe(boxEl)
+      boxEl.addEventListener('click', () => {
+        io.unobserve(boxEl)
+        boxEl.classList.remove('active')
+      })
+    })
+  </script>
+</body>
+</html>

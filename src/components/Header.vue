@@ -20,7 +20,7 @@
       </div>
       <div class="ranking">
         <div
-          ref="swiper"
+          ref="swiperEl"
           class="swiper-container">
           <div class="swiper-wrapper">
             <div
@@ -135,54 +135,54 @@ import dayjs from 'dayjs'
 import Swiper from 'swiper/bundle'
 import 'swiper/swiper-bundle.css'
 import _throttle from 'lodash/throttle'
+import { 
+  ref, getCurrentInstance, computed, onMounted, nextTick 
+} from 'vue'
 
 export default {
-  data() {
-    return {
-      searchText: '',
-      rankings: {},
-      tabIndex: 0,
-      isShowRankingWrap: false,
-      isFixed: false,
-      myMenu: [
-        { name: '나의 쿠폰', href: 'javascript:void(0)' },
-        { name: '주문/배송조회', href: 'javascript:void(0)' },
-        { name: '취소/반품/교환', href: 'javascript:void(0)' },
-        { name: '고객센터', href: 'javascript:void(0)' },
-        { name: '회원정보', href: 'javascript:void(0)' }
-      ]
-    }
-  }, 
-  computed: {
-    referenceDate() {
-      return dayjs(this.rankings.referenceDate).format('YYYY.MM.DD HH:mm')
-    },
-    filteredRankings() {
-      return this.rankings.rankings.filter((rank, index) => {
-        const start = this.tabIndex * 10
-        const end = start + 9
-        return index >= start && index <= end
-      })
-    }
-  },
-  mounted() {
-    this.init()
-  },
-  methods: {
-    async init() {
-      window.addEventListener('scroll', _throttle(() => {
-        this.isFixed = window.scrollY > 120
-      }, 100))
+  setup() {
+    const instance = getCurrentInstance()
+    const { globalProperties } = instance.appContext.config // plugin 이 들어있다 $fetch, $store
 
-      const { data } = await this.$fetch({
+    // Search
+    const searchText = ref('') // 반응성 부여
+    async function search() {
+      const res = await globalProperties.$fetch({
         method: 'GET',
-        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${apiKey}&requestName=rankings`
+        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/search?apiKey=${process.env.API_KEY}&searchText=${searchText.value}`
+      })
+      console.log(res)
+    }
+
+    //Rankings
+    const rankings = ref({})
+    const tabIndex = ref(0)
+    const isShowRankingWrap = ref(false)
+    const swiperEl = ref(null) // $ref 사용하기. 내보내기 하면 이름같은 참조 넣어줌
+    const referenceDate = computed(() => dayjs(rankings.value.referenceDate).format('YYYY.MM.DD HH:mm'))
+    const filteredRankings = computed(() => rankings.value.rankings.filter((rank, index) => {
+      const start = tabIndex.value * 10
+      const end = start + 9
+      return index >= start && index <= end
+    }))
+    function toggleRankingWrap() {
+      isShowRankingWrap.value = !isShowRankingWrap.value
+      if (isShowRankingWrap.value) {
+        window.addEventListener('click', () => {
+          isShowRankingWrap.value = false
+        })
+      }
+    }
+    async function _initRankings() {
+      const { data } = await globalProperties.$fetch({
+        method: 'GET',
+        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/main?apiKey=${process.env.API_KEY}&requestName=rankings`
       })
       console.log('rankings:', data)
-      this.rankings = data // update
+      rankings.value = data // update
 
-      this.$nextTick(() => { // 위의 로직 처리 다 된 후 처리된다. setTimeout 써도 되지만 최적화된 건 아니라서.. -> call stack 참고
-        new Swiper(this.$refs.swiper, {
+      nextTick(() => { // 위의 로직 처리 다 된 후 처리된다. setTimeout 써도 되지만 최적화된 건 아니라서.. -> call stack 참고
+        new Swiper(swiperEl.value, {
           direction: 'vertical',
           speed: 1000,
           autoplay: {
@@ -191,25 +191,43 @@ export default {
           loop: true
         })
       })
-    },
-    onNav(name) {
-      this.$store.dispatch('navigation/onNav', name)
-      console.log(this.$store.state.navigation[`isShow${name}`])
-    },
-    async search() {
-      const res = await this.$fetch({
-        method: 'GET',
-        url: `https://trusting-williams-8cacfb.netlify.app/.netlify/functions/search?apiKey=${apiKey}&searchText=${this.searchText}`
-      })
-      console.log(res)
-    },
-    toggleRankingWrap() {
-      this.isShowRankingWrap = !this.isShowRankingWrap
-      if (this.isShowRankingWrap) {
-        window.addEventListener('click', () => {
-          this.isShowRankingWrap = false
-        })
-      }
+    }
+
+    // Nav
+    function onNav(name) {
+      globalProperties.$store.dispatch('navigation/onNav', name)
+    }
+
+    // Etc...
+    const isFixed = ref(false)
+    const myMenu = ref([
+      { name: '나의 쿠폰', href: 'javascript:void(0)' },
+      { name: '주문/배송조회', href: 'javascript:void(0)' },
+      { name: '취소/반품/교환', href: 'javascript:void(0)' },
+      { name: '고객센터', href: 'javascript:void(0)' },
+      { name: '회원정보', href: 'javascript:void(0)' }
+    ])
+
+    onMounted(() => {
+      window.addEventListener('scroll', _throttle(() => {
+        isFixed.value = window.scrollY > 120
+      }, 100))
+      _initRankings()
+    })
+
+    return {
+      searchText,
+      search,
+      rankings,
+      tabIndex,
+      isShowRankingWrap,
+      swiperEl,
+      referenceDate,
+      filteredRankings,
+      toggleRankingWrap,
+      onNav,
+      isFixed,
+      myMenu
     }
   }
 }
